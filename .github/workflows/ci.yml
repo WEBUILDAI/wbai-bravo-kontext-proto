@@ -24,3 +24,5 @@ jobs:
         run: make install
       - name: make verify
         run: make verify
+      - name: Container-Image bauen
+        run: docker build -t wbai-bravo-kontext-proto:ci server

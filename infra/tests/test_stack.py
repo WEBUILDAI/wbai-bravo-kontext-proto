@@ -34,6 +34,8 @@ class Mocks(pulumi.runtime.Mocks):
         if args.typ == "azure-native:managedidentity:UserAssignedIdentity":
             outputs["principalId"] = "00000000-0000-0000-0000-00000000beef"
             outputs["clientId"] = "00000000-0000-0000-0000-00000000c1d0"
+        if args.typ == "azure-native:app:ManagedEnvironment":
+            outputs["defaultDomain"] = "nice-sea-123.germanywestcentral.azurecontainerapps.io"
         if args.typ == "azure-native:app:ContainerApp":
             outputs["latestRevisionFqdn"] = "ca.example.azurecontainerapps.io"
             # Input ist eine Liste von IDs, der Output eine Map ID -> Details.
@@ -138,6 +140,9 @@ def test_container_app_scale_resources_and_secret():
         assert "value" not in secret
         env = {e["name"]: e for e in container["env"]}
         assert env["BRAVO_KONTEXT_TOKEN"]["secretRef"] == "bravo-kontext-token"
+        assert env["BRAVO_ALLOWED_HOSTS"]["value"] == (
+            "ca-wbai-bravo-kontext-proto.nice-sea-123.germanywestcentral.azurecontainerapps.io"
+        )
         assert ca.inputs["identity"]["type"] == "UserAssigned"
 
     return OUTPUTS["kontextUrl"].apply(check)

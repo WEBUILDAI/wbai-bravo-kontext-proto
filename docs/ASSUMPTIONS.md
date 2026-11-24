@@ -33,3 +33,22 @@ Status: **entschieden** (im Code umgesetzt) oder **offen** (braucht Menschen/Adm
 |---|---|---|
 | A-REPO-1 | Commits laufen unter der neutralen Identität `Bravo Tracer Bullet <bravo-tracer-bullet@users.noreply.github.com>`. | entschieden |
 | A-REPO-2 | Der verwaiste Remote-Branch `feature/s5-infra` (erster Push mit falscher Default-Autorenschaft, Löschen war aus der Session nicht erlaubt) soll von einem Menschen gelöscht werden. Gültiger S5-Branch: `feature/s5-infra-stack`. | offen |
+
+## S6 Wissens-MCP
+| ID | Annahme / Punkt | Status |
+|---|---|---|
+| A-S6-1 | `mcp>=1.20,<2` (gepinnt 1.x per `make compile`), FastMCP mit `stateless_http=True` und `json_response=True`: keine Server-Sessions, passt zu min 0 / max 1 Replica. Host-App ist Starlette; ihr Lifespan führt `session_manager.run()` aus. | entschieden |
+| A-S6-2 | DNS-Rebinding-Schutz über `BRAVO_ALLOWED_HOSTS`. In Azure setzt der Pulumi-Stack den Wert auf `ca-wbai-bravo-kontext-proto.<defaultDomain der CAE>`; `*` schaltet die Prüfung ab. | entschieden |
+| A-S6-3 | Ranking-Modell laut HANDOFF `claude-haiku-4-5-20251001`, konfigurierbar über `BRAVO_RANKING_MODEL`. Aktuelle Haiku-Generation wäre `claude-haiku-5-5`; Wechsel ist nur eine Env-Änderung. Ranking: bis zu `3 × max` Keyword-Kandidaten an Claude (nur id, typ, titel, beschreibung, tech, tags), Antwort als JSON `{"ids": [...]}`, unbekannte IDs werden verworfen; bei jedem Fehler Fallback auf Keyword-Reihenfolge. | entschieden |
+| A-S6-4 | Keyword-Score: Titel 3, Beschreibung 2, Tech/Tags 3, Inhalt 1 je Begriff; Bonus 5 bei Tech-Überschneidung; Stoppwörter DE/EN, Begriffe ≥ 3 Zeichen, Bindestrich-Wörter zusätzlich zerlegt. | entschieden |
+| A-S6-5 | Log-Zeilen enthalten IDs, Anzahl, Ranking-Art, Dauer, Filter, aber nicht den Aufgabentext (könnte vertrauliche Details enthalten). | entschieden |
+| A-S6-6 | `context_pack` liefert den Inhalt mit, `search` und `related` nur Metadaten, `get` alles. `max` ist auf 25 begrenzt. | entschieden |
+| A-S6-7 | `propose` setzt `kunde`/`projekt` aus `BRAVO_DEFAULT_KUNDE`/`BRAVO_DEFAULT_PROJEKT` (Standard `wbai`/`bravo`), validiert gegen das Schema und gibt beides nie zurück. Branch `feature/wissen-<slug>`, PR gegen `WISSEN_REF` (main), Beschreibung beginnt mit `[PROTOTYP]`. Existiert der Branch schon, kommt `status: abgelehnt` mit GitHub-Fehler zurück. | entschieden |
+| A-S6-8 | Offline-Modus: `WISSEN_LOCAL_PATH` hat Vorrang für das Lesen. Ohne GitHub App ist `propose` gestubbt (`status: offline`, nichts wird geschrieben). | entschieden |
+| A-S6-9 | `/notify` leitet nur Adaptive Cards im Format von `scripts/notify-teams.sh` weiter, deren erster Text mit `[PROTOTYP]` beginnt; max. 64 KB. Ohne `TEAMS_WEBHOOK_URL` antwortet es `202 noop`. | entschieden |
+| A-S6-10 | Schema `eintrag.schema.json` als Kopie im Paket (eingefroren im Wissens-Repo), damit der Server offline validieren kann. | entschieden |
+| A-S6-11 | Docker-Daemon war in der Session nicht verfügbar; das Image wird im CI-Job `verify` gebaut. Lokal per `make docker-build`. | entschieden |
+| A-S6-12 | GitHub App A12 anlegen und in der Org installieren (Rechte: Contents RW, Pull requests RW, Issues RW auf wissen- und sample-Repo). | offen |
+| A-S6-13 | KV-Secrets für `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, `GITHUB_APP_PRIVATE_KEY`, optional `ANTHROPIC_API_KEY` und `TEAMS_WEBHOOK_URL` anlegen und im Pulumi-Stack als weitere `secrets`/`env` der Container App ergänzen. Bewusst noch nicht im Stack, weil eine Revision mit fehlenden KV-Secrets nicht startet. | offen |
+| A-S6-14 | Image nach `acrwbaibravoproto` pushen (`az acr build`) und Pulumi-Config `image` umstellen. | offen |
+| A-S6-15 | Network secret der Cloud-Umgebung, das `Authorization: Bearer …` an Requests zur Container-App-URL hängt (siehe sample `notify-teams.sh`). | offen |

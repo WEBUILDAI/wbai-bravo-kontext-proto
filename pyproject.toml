@@ -22,6 +22,6 @@ convention = "google"
 known-first-party = ["bravo_infra", "bravo_kontext"]
 
 [tool.pytest.ini_options]
-testpaths = ["infra/tests"]
-pythonpath = ["infra"]
+testpaths = ["infra/tests", "server/tests"]
+pythonpath = ["infra", "server"]
 addopts = "-q"

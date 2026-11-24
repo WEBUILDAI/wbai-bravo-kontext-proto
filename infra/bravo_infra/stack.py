@@ -193,6 +193,12 @@ def build(settings: InfraSettings) -> dict[str, pulumi.Output]:
                         app.EnvironmentVarArgs(name="WISSEN_REPO", value=settings.wissen_repo),
                         app.EnvironmentVarArgs(name="SAMPLE_REPO", value=settings.sample_repo),
                         app.EnvironmentVarArgs(name="LOG_FORMAT", value="json"),
+                        app.EnvironmentVarArgs(
+                            name="BRAVO_ALLOWED_HOSTS",
+                            value=pulumi.Output.concat(
+                                "ca-wbai-bravo-kontext-proto.", environment.default_domain
+                            ),
+                        ),
                     ],
                 )
             ],

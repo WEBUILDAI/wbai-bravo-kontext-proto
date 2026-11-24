@@ -188,3 +188,84 @@ class GitHubApp:
             json={"head": head, "base": base, "title": title, "body": body},
         )
         return resp.json()
+
+    async def create_issue(
+        self, repo: str, title: str, body: str, labels: list[str]
+    ) -> dict[str, Any]:
+        """Legt ein Issue an.
+
+        Args:
+            repo: ``owner/repo``.
+            title: Titel.
+            body: Beschreibung.
+            labels: Labels.
+
+        Returns:
+            Issue-Objekt der API.
+        """
+        resp = await self.request(
+            "POST", f"/repos/{repo}/issues", json={"title": title, "body": body, "labels": labels}
+        )
+        return resp.json()
+
+    async def list_issues(self, repo: str, labels: list[str], state: str = "open") -> list[dict]:
+        """Listet Issues (ohne Pull Requests) mit allen angegebenen Labels.
+
+        Args:
+            repo: ``owner/repo``.
+            labels: Labels, die alle gesetzt sein müssen.
+            state: ``open``, ``closed`` oder ``all``.
+
+        Returns:
+            Liste von Issue-Objekten (höchstens 100).
+        """
+        resp = await self.request(
+            "GET",
+            f"/repos/{repo}/issues",
+            params={"labels": ",".join(labels), "state": state, "per_page": 100},
+        )
+        return [i for i in resp.json() if "pull_request" not in i]
+
+    async def get_issue(self, repo: str, number: int) -> dict[str, Any]:
+        """Liest ein Issue.
+
+        Args:
+            repo: ``owner/repo``.
+            number: Issue-Nummer.
+
+        Returns:
+            Issue-Objekt der API.
+        """
+        resp = await self.request("GET", f"/repos/{repo}/issues/{number}")
+        return resp.json()
+
+    async def list_comments(self, repo: str, number: int) -> list[dict]:
+        """Listet die Kommentare eines Issues (älteste zuerst, höchstens 100).
+
+        Args:
+            repo: ``owner/repo``.
+            number: Issue-Nummer.
+
+        Returns:
+            Liste von Kommentar-Objekten.
+        """
+        resp = await self.request(
+            "GET", f"/repos/{repo}/issues/{number}/comments", params={"per_page": 100}
+        )
+        return resp.json()
+
+    async def create_comment(self, repo: str, number: int, body: str) -> dict[str, Any]:
+        """Kommentiert ein Issue.
+
+        Args:
+            repo: ``owner/repo``.
+            number: Issue-Nummer.
+            body: Kommentartext.
+
+        Returns:
+            Kommentar-Objekt der API.
+        """
+        resp = await self.request(
+            "POST", f"/repos/{repo}/issues/{number}/comments", json={"body": body}
+        )
+        return resp.json()

@@ -34,6 +34,7 @@ class Settings:
         cache_ttl_seconds: Wie lange Einträge aus GitHub gecacht werden.
         default_kunde: ``kunde`` für neue Vorschläge (nur Metadatum).
         default_projekt: ``projekt`` für neue Vorschläge (nur Metadatum).
+        bot_login: Login der GitHub App als Kommentar-Autor (``<slug>[bot]``).
         log_format: ``json`` oder ``text``.
         log_level: Python-Log-Level.
     """
@@ -53,6 +54,7 @@ class Settings:
     cache_ttl_seconds: int = 300
     default_kunde: str = "wbai"
     default_projekt: str = "bravo"
+    bot_login: str = "wbai-bravo-mcp-proto[bot]"
     log_format: str = "json"
     log_level: str = "INFO"
 
@@ -101,6 +103,7 @@ class Settings:
             cache_ttl_seconds=int(e.get("BRAVO_CACHE_TTL", "300")),
             default_kunde=e.get("BRAVO_DEFAULT_KUNDE", "wbai"),
             default_projekt=e.get("BRAVO_DEFAULT_PROJEKT", "bravo"),
+            bot_login=e.get("BRAVO_BOT_LOGIN", cls.bot_login),
             log_format=e.get("LOG_FORMAT", "json"),
             log_level=e.get("LOG_LEVEL", "INFO"),
         )

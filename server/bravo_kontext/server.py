@@ -6,12 +6,16 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 
 from bravo_kontext.config import Settings
+from bravo_kontext.filter import redact
+from bravo_kontext.vorschlaege import VorschlagDienst
 from bravo_kontext.wissen import WissensDienst
 
 INSTRUCTIONS = (
     "Wissens-MCP für Bravo (PROTOTYP). Liefert kuratiertes Wissen aus wbai-bravo-wissen-proto. "
     "Zu Beginn einer Aufgabe context_pack aufrufen; Details mit get, Nachbarn mit related. "
-    "Neue Learnings am Ende einer Aufgabe mit propose als PR vorschlagen."
+    "Neue Learnings am Ende einer Aufgabe mit propose als PR vorschlagen. "
+    "Änderungswünsche an der Anwendung mit vorschlag_anlegen einreichen; Rückfragen dazu mit "
+    "meine_rueckfragen abholen und mit antworten beantworten; Stand mit status."
 )
 
 
@@ -34,12 +38,15 @@ def transport_security(settings: Settings) -> TransportSecuritySettings:
     )
 
 
-def build_mcp(settings: Settings, dienst: WissensDienst) -> FastMCP:
-    """Erzeugt den FastMCP-Server mit allen Wissens-Tools.
+def build_mcp(
+    settings: Settings, dienst: WissensDienst, vorschlaege: VorschlagDienst | None = None
+) -> FastMCP:
+    """Erzeugt den FastMCP-Server mit allen Wissens- und Vorschlags-Tools.
 
     Args:
         settings: Konfiguration.
-        dienst: Fachlogik.
+        dienst: Fachlogik für Wissen.
+        vorschlaege: Fachlogik für Änderungsvorschläge; Standard aus ``settings``.
 
     Returns:
         Konfigurierter FastMCP-Server (stateless, JSON-Antworten).
@@ -124,5 +131,52 @@ def build_mcp(settings: Settings, dienst: WissensDienst) -> FastMCP:
         return await dienst.propose(
             typ, titel, beschreibung, tech, inhalt, tags, quelle, gueltig_bis
         )
+
+    vorschlaege = vorschlaege or VorschlagDienst.aus_settings(settings, dienst.github)
+
+    @mcp.tool()
+    async def vorschlag_anlegen(
+        titel: str, beschreibung: str, autor: str, kontext: str | None = None
+    ) -> dict[str, Any]:
+        """Änderungsvorschlag für die Anwendung einreichen (Issue mit Label triage).
+
+        Keine Kundennamen, Secrets oder personenbezogenen Daten angeben.
+
+        Args:
+            titel: Kurzer Titel (5-120 Zeichen).
+            beschreibung: Was soll sich ändern und warum.
+            autor: Dein Kürzel oder GitHub-Handle (keine E-Mail-Adresse).
+            kontext: Optional: betroffene Stelle, Link oder Beispiel.
+        """
+        return redact(await vorschlaege.vorschlag_anlegen(titel, beschreibung, autor, kontext))
+
+    @mcp.tool()
+    async def meine_rueckfragen(autor: str) -> dict[str, Any]:
+        """Offene Rückfragen zu deinen Vorschlägen abholen.
+
+        Args:
+            autor: Dein Kürzel oder GitHub-Handle wie bei vorschlag_anlegen.
+        """
+        return redact(await vorschlaege.meine_rueckfragen(autor))
+
+    @mcp.tool()
+    async def antworten(issue: int, text: str, autor: str) -> dict[str, Any]:
+        """Eine Rückfrage zu deinem Vorschlag beantworten.
+
+        Args:
+            issue: Nummer des Vorschlags.
+            text: Deine Antwort.
+            autor: Dein Kürzel oder GitHub-Handle wie bei vorschlag_anlegen.
+        """
+        return redact(await vorschlaege.antworten(issue, text, autor))
+
+    @mcp.tool()
+    async def status(issue: int) -> dict[str, Any]:
+        """Stand eines Vorschlags: Phase, Labels, offene Rückfrage, letzte Kommentare.
+
+        Args:
+            issue: Nummer des Vorschlags.
+        """
+        return redact(await vorschlaege.status(issue))
 
     return mcp

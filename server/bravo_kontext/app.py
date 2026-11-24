@@ -22,6 +22,7 @@ from bravo_kontext.logging_setup import configure_logging, log_auslieferung
 from bravo_kontext.quelle import GitHubQuelle, LeereQuelle, LokaleQuelle, WissenQuelle
 from bravo_kontext.ranking import ClaudeRanker
 from bravo_kontext.server import build_mcp
+from bravo_kontext.vorschlaege import VorschlagDienst
 from bravo_kontext.wissen import WissensDienst
 
 logger = logging.getLogger(__name__)
@@ -173,6 +174,7 @@ def create_app(
     settings: Settings,
     dienst: WissensDienst | None = None,
     notify_transport: httpx.AsyncBaseTransport | None = None,
+    vorschlaege: VorschlagDienst | None = None,
 ) -> ASGIApp:
     """Baut die ASGI-App.
 
@@ -180,12 +182,13 @@ def create_app(
         settings: Konfiguration.
         dienst: Optional vorgefertigter Dienst (für Tests).
         notify_transport: Optionaler httpx-Transport für ``/notify`` (für Tests).
+        vorschlaege: Optional vorgefertigter Vorschlagsdienst (für Tests).
 
     Returns:
         ASGI-App mit Auth-Middleware.
     """
     dienst = dienst or build_dienst(settings)
-    mcp = build_mcp(settings, dienst)
+    mcp = build_mcp(settings, dienst, vorschlaege)
     mcp_app = mcp.streamable_http_app()
 
     @contextlib.asynccontextmanager

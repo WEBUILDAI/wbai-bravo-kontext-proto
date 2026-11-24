@@ -52,3 +52,15 @@ Status: **entschieden** (im Code umgesetzt) oder **offen** (braucht Menschen/Adm
 | A-S6-13 | KV-Secrets für `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, `GITHUB_APP_PRIVATE_KEY`, optional `ANTHROPIC_API_KEY` und `TEAMS_WEBHOOK_URL` anlegen und im Pulumi-Stack als weitere `secrets`/`env` der Container App ergänzen. Bewusst noch nicht im Stack, weil eine Revision mit fehlenden KV-Secrets nicht startet. | offen |
 | A-S6-14 | Image nach `acrwbaibravoproto` pushen (`az acr build`) und Pulumi-Config `image` umstellen. | offen |
 | A-S6-15 | Network secret der Cloud-Umgebung, das `Authorization: Bearer …` an Requests zur Container-App-URL hängt (siehe sample `notify-teams.sh`). | offen |
+
+## S9 Vorschlags-Tools
+| ID | Annahme / Punkt | Status |
+|---|---|---|
+| A-S9-1 | Der MCP kennt die aufrufende Person nicht (ein gemeinsames Bearer-Token). Deshalb gibt sie sich über den Parameter `autor` an (Kürzel oder GitHub-Handle, `^[a-z0-9][a-z0-9-]{1,38}$`). E-Mail-Adressen werden abgelehnt, weil das sample-Repo öffentlich ist. Keine Verifikation im Prototyp; für Produktion OAuth am MCP. | entschieden |
+| A-S9-2 | Zuordnung Vorschlag → Person über den HTML-Kommentar `<!-- bravo-autor: <autor> -->` im Issue-Body. `antworten` und `status` arbeiten nur auf Issues mit diesem Marker; `antworten` nur für den eigenen `autor` und offene Issues. | entschieden |
+| A-S9-3 | Rückfrage = offenes Issue mit Label `triage`, dessen letzter Kommentar nicht vom App-Bot (`BRAVO_BOT_LOGIN`, Standard `wbai-bravo-mcp-proto[bot]`) stammt. Fragen von `claude[bot]` aus `bravo-triage.yml` zählen damit als Rückfrage. | entschieden |
+| A-S9-4 | Antworten laufen als Kommentar des App-Bots mit Präfix `**Antwort von <autor>**`; der Guard in `bravo-triage.yml` (sample) lässt `wbai-bravo-mcp-proto[bot]` zu, sodass die Antwort die Triage erneut auslöst. Der Login muss zum tatsächlichen Slug der GitHub App A12 passen. | offen |
+| A-S9-5 | Phasen in `status`: geschlossen + `not_planned` → abgelehnt, geschlossen → erledigt, Label `ready` → bereit zur Umsetzung, Label `triage` → in Prüfung. Verknüpfte PRs werden im Prototyp nicht aufgelöst. | entschieden |
+| A-S9-6 | Issue-Titel `Vorschlag: <titel>`, Body beginnt mit `[PROTOTYP]`. Listen sind auf 100 Issues/Kommentare begrenzt (keine Paginierung im Prototyp). | entschieden |
+| A-S9-7 | Ohne GitHub App nutzen die Tools ein In-Memory-Backend (Daten gehen beim Neustart verloren, Antworten tragen `modus: offline`). | entschieden |
+| A-S9-8 | Labels `triage` und `ready` müssen im sample-Repo existieren; die GitHub App braucht dort Issues RW. | offen |

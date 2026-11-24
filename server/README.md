@@ -20,6 +20,12 @@ Liefert Claude-Sessions Kontext aus `wbai-bravo-wissen-proto` und nimmt Vorschl�
 | `get(id)` | Eintrag vollständig (`<typ>/<slug>`) |
 | `related(id, max=5)` | Verwandte Einträge über Tech, Tags und Begriffe |
 | `propose(typ, titel, beschreibung, tech, inhalt, tags?, quelle?, gueltig_bis?)` | Branch `feature/wissen-<slug>` + PR im Wissens-Repo; offline gestubbt |
+| `vorschlag_anlegen(titel, beschreibung, autor, kontext?)` | Issue mit Label `triage` im sample-Repo (S9) |
+| `meine_rueckfragen(autor)` | Offene eigene Vorschläge, deren letzter Kommentar nicht vom MCP stammt |
+| `antworten(issue, text, autor)` | Kommentar auf den eigenen Vorschlag (löst `bravo-triage.yml` erneut aus) |
+| `status(issue)` | Phase (in Prüfung / bereit zur Umsetzung / erledigt / abgelehnt), Labels, letzte Kommentare |
+
+Die Vorschlags-Tools arbeiten ohne GitHub App mit einem In-Memory-Backend (`modus: offline`).
 
 Garantien (mit Tests):
 - Abgelaufene Einträge (`gueltig_bis` < heute) werden nie ausgeliefert.

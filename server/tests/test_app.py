@@ -45,6 +45,7 @@ def test_tools_list(client):
     assert resp.status_code == 200
     namen = {t["name"] for t in resp.json()["result"]["tools"]}
     assert {"context_pack", "search", "get", "related", "propose"} <= namen
+    assert {"vorschlag_anlegen", "meine_rueckfragen", "antworten", "status"} <= namen
 
 
 def test_initialize(client):

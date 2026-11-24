@@ -1,0 +1,6 @@
+# Werkzeuge für Entwicklung und CI. Kompiliert per `make compile`.
+black
+ruff
+pytest
+pre-commit
+pip-tools

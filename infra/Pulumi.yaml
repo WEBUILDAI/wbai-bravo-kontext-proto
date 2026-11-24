@@ -1,0 +1,9 @@
+name: wbai-bravo-kontext-proto
+description: "[PROTOTYP, nonprod] Azure-Infrastruktur für den Bravo-Wissens-MCP"
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: ../.venv
+backend:
+  url: azblob://pulumi-state?storage_account=stwbaibravostateproto

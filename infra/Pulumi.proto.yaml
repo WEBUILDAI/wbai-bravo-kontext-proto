@@ -1,0 +1,12 @@
+# Stack proto. Keine Secrets in dieser Datei.
+# Pflicht, vom Menschen zu setzen (siehe docs/ASSUMPTIONS.md, A-INFRA-3):
+#   pulumi config set owner <owner-adresse-aus-README> --stack proto
+config:
+  azure-native:location: germanywestcentral
+  wbai-bravo-kontext-proto:resourceGroupName: rg-wbai-bravo-proto
+  # Platzhalter-Image, bis das erste Image nach acrwbaibravoproto gepusht ist.
+  wbai-bravo-kontext-proto:image: mcr.microsoft.com/k8se/quickstart:latest
+  wbai-bravo-kontext-proto:budgetAmount: "50"
+  wbai-bravo-kontext-proto:budgetStartDate: "2026-12-01T00:00:00Z"
+  wbai-bravo-kontext-proto:wissenRepo: WEBUILDAI/wbai-bravo-wissen-proto
+  wbai-bravo-kontext-proto:sampleRepo: WEBUILDAI/wbai-bravo-sample-proto
